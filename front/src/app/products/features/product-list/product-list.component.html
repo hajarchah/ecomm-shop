@@ -1,0 +1,80 @@
+<h1 class="text-center">Product Catalog</h1>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <button pButton label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+    </ng-template>
+  </p-toolbar>
+</div>
+
+<p-dialog [(visible)]="productDialog" [style]="{width: '450px'}" header="Product Details" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <app-product-form 
+      [product]="selectedProduct || emptyProduct"
+      (save)="saveProduct($event)"
+      (cancel)="productDialog = false">
+    </app-product-form>
+  </ng-template>
+</p-dialog>
+
+<div class="product-list">
+  <!-- Filter Controls -->
+  <div class="filter-container p-3 mb-3 card">
+    <div class="flex flex-column md:flex-row gap-3">
+      <div class="p-input-icon-left flex-1">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          [(ngModel)]="searchQuery" 
+          (input)="filterProducts()"
+          placeholder="Search products" 
+          class="w-full" />
+      </div>
+      <div>
+        <p-dropdown 
+          [options]="categories" 
+          [(ngModel)]="selectedCategory" 
+          (onChange)="filterProducts()"
+          placeholder="Select Category" 
+          class="w-full md:w-14rem">
+        </p-dropdown>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debugging Info -->
+  <div class="debug-info mb-2">
+    <p>Total products: {{products.length}} | Filtered products: {{filteredProducts.length}}</p>
+  </div>
+
+  <!-- Product List -->
+  <div class="grid">
+    <div *ngFor="let product of filteredProducts" class="col-12 sm:col-6 lg:col-3 p-2">
+      <div class="card h-full">
+        <div class="card-header">
+          <img 
+            alt="{{product.name}}" 
+            [src]="product.image" 
+            (error)="onImageError($event)"
+            class="product-image"
+          />
+        </div>
+        <div class="card-body">
+          <h5>{{product.name}}</h5>
+          <p>{{product.description}}</p>
+          <p>{{product.price | currency:'EUR'}}</p>
+          <p>{{product.category}}</p>
+          <p>{{product.inventoryStatus || 'Unknown'}}</p>
+        </div>
+        <div class="card-footer">
+          <button pButton label="Add to Cart" (click)="addToCart(product)"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

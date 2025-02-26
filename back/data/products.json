@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "code": "P001",
+    "name": "Laptop Pro",
+    "description": "High-performance laptop for professionals",
+    "image": "./assets/images/laptop.jpg",
+    "category": "Electronics",
+    "price": 1299.99,
+    "quantity": 15,
+    "inventoryStatus": "INSTOCK",
+    "rating": 4.5,
+    "createdAt": 1740577040547,
+    "updatedAt": 1740577040547
+  },
+  {
+    "id": 2,
+    "code": "P002",
+    "name": "Wireless Earbuds",
+    "description": "Noise canceling wireless earbuds",
+    "image": "./assets/images/earbuds.jpeg",
+    "category": "Audio",
+    "price": 129.99,
+    "quantity": 25,
+    "inventoryStatus": "INSTOCK",
+    "rating": 4.2,
+    "createdAt": 1740577040547,
+    "updatedAt": 1740577040547
+  },
+  {
+    "id": 3,
+    "code": "P003",
+    "name": "Smart Watch",
+    "description": "Fitness and health tracking smart watch",
+    "image": "./assets/images/watch1.jpg",
+    "category": "Wearables",
+    "price": 199.99,
+    "quantity": 5,
+    "inventoryStatus": "LOWSTOCK",
+    "rating": 4,
+    "createdAt": 1740577040547,
+    "updatedAt": 1740577040547
+  }
+]

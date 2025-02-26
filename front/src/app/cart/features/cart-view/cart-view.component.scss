@@ -1,0 +1,27 @@
+.cart-view {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .empty-cart {
+    text-align: center;
+    padding: 2rem;
+    
+    i {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+:host ::ng-deep {
+  .p-inputnumber {
+    width: 8rem;
+  }
+  
+  .p-card {
+    .p-card-content {
+      padding-top: 1rem;
+    }
+  }
+}
