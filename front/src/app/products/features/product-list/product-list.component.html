@@ -3,14 +3,6 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div class="card">
-  <p-toolbar styleClass="mb-4 gap-2">
-    <ng-template pTemplate="left">
-      <button pButton label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
-    </ng-template>
-  </p-toolbar>
-</div>
-
 <p-dialog [(visible)]="productDialog" [style]="{width: '450px'}" header="Product Details" [modal]="true" styleClass="p-fluid">
   <ng-template pTemplate="content">
     <app-product-form 
@@ -21,60 +13,108 @@
   </ng-template>
 </p-dialog>
 
-<div class="product-list">
-  <!-- Filter Controls -->
-  <div class="filter-container p-3 mb-3 card">
-    <div class="flex flex-column md:flex-row gap-3">
-      <div class="p-input-icon-left flex-1">
+<div class="product-list-container">
+  <!-- Toolbar with search and filters -->
+  <div class="search-filter-container p-3">
+    <div class="p-inputgroup search-box">
+      <span class="p-inputgroup-addon">
         <i class="pi pi-search"></i>
-        <input 
-          type="text" 
-          pInputText 
-          [(ngModel)]="searchQuery" 
-          (input)="filterProducts()"
-          placeholder="Search products" 
-          class="w-full" />
-      </div>
-      <div>
-        <p-dropdown 
-          [options]="categories" 
-          [(ngModel)]="selectedCategory" 
-          (onChange)="filterProducts()"
-          placeholder="Select Category" 
-          class="w-full md:w-14rem">
-        </p-dropdown>
-      </div>
+      </span>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="filterProducts()"
+        placeholder="Search products..."
+        class="p-inputtext"
+      />
     </div>
+    <p-dropdown
+      [options]="categories"
+      [(ngModel)]="selectedCategory"
+      (onChange)="filterProducts()"
+      placeholder="Select Category"
+      styleClass="category-dropdown"
+      [showClear]="true"
+    ></p-dropdown>
+    <button
+      pButton
+      icon="pi pi-plus"
+      label="Add Product"
+      class="p-button-rounded p-button-primary add-button"
+      (click)="openNew()"
+    ></button>
   </div>
 
-  <!-- Debugging Info -->
-  <div class="debug-info mb-2">
-    <p>Total products: {{products.length}} | Filtered products: {{filteredProducts.length}}</p>
+  <!-- No products message -->
+  <div *ngIf="filteredProducts.length === 0" class="no-products">
+    <i class="pi pi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+    <h3>No products found</h3>
+    <p>Try adjusting your search or filter criteria</p>
   </div>
 
-  <!-- Product List -->
-  <div class="grid">
-    <div *ngFor="let product of filteredProducts" class="col-12 sm:col-6 lg:col-3 p-2">
-      <div class="card h-full">
-        <div class="card-header">
-          <img 
-            alt="{{product.name}}" 
-            [src]="product.image" 
-            (error)="onImageError($event)"
-            class="product-image"
-          />
-        </div>
-        <div class="card-body">
-          <h5>{{product.name}}</h5>
-          <p>{{product.description}}</p>
-          <p>{{product.price | currency:'EUR'}}</p>
-          <p>{{product.category}}</p>
-          <p>{{product.inventoryStatus || 'Unknown'}}</p>
-        </div>
-        <div class="card-footer">
-          <button pButton label="Add to Cart" (click)="addToCart(product)"></button>
-        </div>
+  <!-- Product grid -->
+  <div class="product-grid">
+    <div *ngFor="let product of filteredProducts" class="product-card-container">
+      <div class="product-card">
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="product-image-container">
+              <img
+                [src]="product.image"
+                [alt]="product.name"
+                (error)="onImageError($event)"
+                class="product-image"
+              />
+              <div class="product-overlay">
+                <button
+                  pButton
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-text p-button-sm"
+                  (click)="editProduct(product)"
+                ></button>
+                <button
+                  pButton
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                  (click)="deleteProduct(product)"
+                ></button>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="content">
+            <div class="product-category">
+              <span class="category-badge">{{ product.category }}</span>
+              <span class="inventory-badge" [ngClass]="'status-' + product.inventoryStatus.toLowerCase()">
+                {{ product.inventoryStatus }}
+              </span>
+            </div>
+            <h3 class="product-title">{{ product.name }}</h3>
+            <p class="product-description">{{ product.description | slice:0:80 }}{{ product.description.length > 80 ? '...' : '' }}</p>
+            <div class="product-rating">
+              <i *ngFor="let star of [1,2,3,4,5]" 
+                class="pi" 
+                [ngClass]="{'pi-star-fill': star <= product.rating, 'pi-star': star > product.rating}"
+                [style.color]="star <= product.rating ? '#FFD700' : '#ccc'"></i>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <div class="product-footer">
+              <span class="product-price">{{ product.price | currency }}</span>
+              <button
+                pButton
+                icon="pi pi-shopping-cart"
+                label="Add to Cart"
+                class="p-button-rounded p-button"
+                (click)="addToCart(product)"
+              ></button>
+            </div>
+          </ng-template>
+        </p-card>
       </div>
     </div>
   </div>
 </div>
+
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+<p-toast></p-toast>

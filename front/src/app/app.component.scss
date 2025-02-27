@@ -1,4 +1,26 @@
+/* filepath: /c:/Users/hajar/ecomm-shop/front/src/app/app.component.scss */
+:host {
+  display: block;
+  height: 100vh;
+}
+
+* {
+  font-family: "Noto Sans", serif;
+}
+
+.p-toolbar {
+  background-color: var(--primary-bg-color);
+  color: var(--primary-font-color);
+}
+
+.p-splitter {
+  border: none;
+}
+
 .app-content {
-    overflow: hidden;
-    height: 100%;
+  overflow: hidden;
+  height: 100%;
+  padding: 1rem;
+  background-color: var(--secondary-bg-color);
+  color: var(--secondary-font-color);
 }

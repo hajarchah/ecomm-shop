@@ -1,35 +1,59 @@
 import { CartItem } from '../types/cartItem';
 import { Product } from '../types/product';
 
-export class CartService {
-  private cart: CartItem[] = [];
+// Store carts by user ID
+const userCarts: { [userId: string]: CartItem[] } = {};
 
-  public getCart(): CartItem[] {
-    console.log('Retrieving cart:', this.cart); // Add logging
-    return this.cart;
+export class CartService {
+  // Get cart for a specific user
+  public getCart(userId: string): CartItem[] {
+    // Initialize empty cart if doesn't exist yet
+    if (!userCarts[userId]) {
+      userCarts[userId] = [];
+    }
+    return userCarts[userId];
   }
 
-  public addToCart(product: Product, quantity: number): void {
-    const existingItem = this.cart.find(item => item.product.id === product.id);
+  // Add item to user's cart
+  public addToCart(userId: string, product: Product, quantity: number): CartItem {
+    const cart = this.getCart(userId);
+    
+    const existingItem = cart.find(item => item.product.id === product.id);
     if (existingItem) {
       existingItem.quantity += quantity;
+      return existingItem;
     } else {
-      this.cart.push({ product, quantity });
+      const newItem = { product, quantity };
+      cart.push(newItem);
+      return newItem;
     }
   }
 
-  public updateCart(productId: number, quantity: number): void {
-    const item = this.cart.find(item => item.product.id === productId);
+  // Update quantity of an item in user's cart
+  public updateCart(userId: string, productId: number, quantity: number): CartItem | null {
+    const cart = this.getCart(userId);
+    const item = cart.find(item => item.product.id === productId);
+    
     if (item) {
       item.quantity = quantity;
+      return item;
     }
+    return null;
   }
 
-  public removeFromCart(productId: number): void {
-    this.cart = this.cart.filter(item => item.product.id !== productId);
+  // Remove item from user's cart
+  public removeFromCart(userId: string, productId: number): boolean {
+    const cart = this.getCart(userId);
+    const initialLength = cart.length;
+    userCarts[userId] = cart.filter(item => item.product.id !== productId);
+    return initialLength !== userCarts[userId].length;
   }
 
-  public clearCart(): void {
-    this.cart = [];
+  // Clear user's entire cart
+  public clearCart(userId: string): void {
+    userCarts[userId] = [];
   }
 }
+
+// Export as singleton
+export const cartService = new CartService();

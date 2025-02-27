@@ -1,24 +1,36 @@
-import { Component } from "@angular/core";
-import { RouterModule } from "@angular/router";
-import { SplitterModule } from 'primeng/splitter';
-import { ToolbarModule } from 'primeng/toolbar';
-import { PanelMenuComponent } from "./shared/ui/panel-menu/panel-menu.component";
-import { ToastModule } from "primeng/toast";
-import { CartBadgeComponent } from "./cart/ui/cart-badge/cart-badge.component";
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
+import { HeaderComponent } from './shared/ui/header/header.component';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
-  selector: "app-root",
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.scss"],
+  selector: 'app-root',
   standalone: true,
   imports: [
-    RouterModule, 
-    SplitterModule, 
-    ToolbarModule, 
-    PanelMenuComponent, 
+    CommonModule,
+    RouterOutlet,
+    HeaderComponent,
     ToastModule,
-    CartBadgeComponent
+    ConfirmDialogModule
   ],
+  providers: [MessageService, ConfirmationService],
+  template: `
+    <app-header></app-header>
+    <main>
+      <p-toast></p-toast>
+      <p-confirmDialog></p-confirmDialog>
+      <router-outlet></router-outlet>
+    </main>
+  `,
+  styles: [`
+    main {
+      min-height: calc(100vh - 130px);
+      padding-bottom: 2rem;
+    }
+  `]
 })
 export class AppComponent {
   title = "ALTEN SHOP";

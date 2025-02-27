@@ -1,9 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { CartService } from '../../data-access/cart.service';
-import { CartItem } from '../../data-access/cart-item.model';
+import { Router } from '@angular/router';
+import { CartService, CartItem } from '../../data-access/cart.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Observable, map } from 'rxjs';
 
@@ -11,10 +9,11 @@ import { Observable, map } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-cart-view',
@@ -22,57 +21,59 @@ import { DividerModule } from 'primeng/divider';
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule,
     TableModule,
     ButtonModule,
     InputNumberModule,
+    CardModule,
     ToastModule,
     ConfirmDialogModule,
-    CardModule,
     DividerModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './cart-view.component.html',
-  styleUrls: ['./cart-view.component.scss']
+  styleUrls: ['./cart-view.component.css']
 })
-export class CartViewComponent {
-  private cartService = inject(CartService);
-  private messageService = inject(MessageService);
-  private confirmationService = inject(ConfirmationService);
-
-  cartItems$ = this.cartService.cartItems$;
+export class CartViewComponent implements OnInit {
+  // Use cart$ from CartService
+  cart$ = this.cartService.cart$;
   
-  subtotal$ = this.cartItems$.pipe(
-    map(items => items.reduce(
-      (total: number, item: CartItem) => total + (item.product.price * item.quantity), 
+  // Derived calculations
+  subtotal$ = this.cart$.pipe(
+    map((items: CartItem[]) => items.reduce(
+      (total, item) => total + (item.product.price * item.quantity), 
       0
     ))
   );
-
+  
   tax$ = this.subtotal$.pipe(
-    map(subtotal => subtotal * 0.20) // 20% tax
+    map((subtotal: number) => subtotal * 0.20) // 20% tax
+  );
+  
+  total$ = this.subtotal$.pipe(
+    map((subtotal: number) => subtotal * 1.20) // subtotal + 20% tax
   );
 
-  total$ = this.subtotal$.pipe(
-    map(subtotal => subtotal * 1.20) // subtotal + 20% tax
-  );
+  constructor(
+    private cartService: CartService,
+    private router: Router,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
+  ) {}
+
+  ngOnInit(): void {}
 
   updateQuantity(item: CartItem, newQuantity: number): void {
-    if (newQuantity < 1) {
-      this.removeItem(item);
-      return;
-    }
-
-    this.cartService.updateCart(item.product.id, newQuantity).subscribe({
+    // Use updateQuantity instead of updateCartItem
+    this.cartService.updateQuantity(item.product.id, newQuantity).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
+          summary: 'Updated',
           detail: 'Cart updated successfully'
         });
       },
-      error: (error) => {
-        console.error('Error updating cart:', error);
+      error: (error: any) => {
+        console.error('Error updating cart', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -84,18 +85,21 @@ export class CartViewComponent {
 
   removeItem(item: CartItem): void {
     this.confirmationService.confirm({
-      message: `Are you sure you want to remove ${item.product.name} from your cart?`,
+      message: 'Are you sure you want to remove this item from your cart?',
+      header: 'Confirm Removal',
+      icon: 'pi pi-exclamation-triangle',
       accept: () => {
+        // Ensure we're passing a number, not a string
         this.cartService.removeFromCart(item.product.id).subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',
-              summary: 'Success',
+              summary: 'Removed',
               detail: 'Item removed from cart'
             });
           },
-          error: (error) => {
-            console.error('Error removing item:', error);
+          error: (error: any) => {
+            console.error('Error removing item', error);
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
@@ -110,17 +114,19 @@ export class CartViewComponent {
   clearCart(): void {
     this.confirmationService.confirm({
       message: 'Are you sure you want to clear your cart?',
+      header: 'Confirm Clear Cart',
+      icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.cartService.clearCart().subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',
-              summary: 'Success',
-              detail: 'Cart cleared successfully'
+              summary: 'Cart Cleared',
+              detail: 'Your cart has been cleared'
             });
           },
-          error: (error) => {
-            console.error('Error clearing cart:', error);
+          error: (error: any) => {
+            console.error('Error clearing cart', error);
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
@@ -132,12 +138,11 @@ export class CartViewComponent {
     });
   }
 
-  onCheckout(): void {
-    // Implement checkout logic here
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Info',
-      detail: 'Checkout functionality coming soon!'
-    });
+  continueShopping(): void {
+    this.router.navigate(['/products']);
+  }
+
+  checkout(): void {
+    this.router.navigate(['/checkout']);
   }
 }

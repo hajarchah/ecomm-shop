@@ -1,14 +1,15 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { routes } from './app.routes';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { MessageService, ConfirmationService } from 'primeng/api';
-import { APP_ROUTES } from './app.routes';
+import { authInterceptor } from './auth/interceptors/auth.interceptor';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(APP_ROUTES),
-    provideHttpClient(withFetch()),
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     MessageService,
     ConfirmationService

@@ -4,7 +4,7 @@ import { ProductRepository } from '../repositories/product.repository';
 import { Product } from '../entities/product.entity';
 
 
-export class ProductModel {
+export class ProductModel extends Product {
   // Get all products
   public static async getAllProducts(): Promise<Product[]> {
     return await ProductRepository.find();

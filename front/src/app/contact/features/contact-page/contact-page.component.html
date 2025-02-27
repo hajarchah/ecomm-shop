@@ -1,0 +1,151 @@
+<div class="contact-page">
+  <p-toast></p-toast>
+  
+  <div class="contact-container">
+    <div class="contact-info">
+      <h1>Get in Touch</h1>
+      <p>Have questions about our products or services? Fill out the form and we'll get back to you as soon as possible.</p>
+      
+      <div class="info-section">
+        <div class="info-item">
+          <i class="pi pi-map-marker"></i>
+          <div>
+            <h3>Address</h3>
+            <p>123 Commerce Street, Business Park<br>City, Country, 12345</p>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <i class="pi pi-phone"></i>
+          <div>
+            <h3>Phone</h3>
+            <p>+1 (555) 123-4567</p>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <i class="pi pi-envelope"></i>
+          <div>
+            <h3>Email</h3>
+            <p>info&#64;altenshop.com</p>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <i class="pi pi-clock"></i>
+          <div>
+            <h3>Business Hours</h3>
+            <p>Monday-Friday: 9am-5pm<br>Saturday: 10am-2pm<br>Sunday: Closed</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="social-links">
+        <a href="#"><i class="pi pi-facebook"></i></a>
+        <a href="#"><i class="pi pi-twitter"></i></a>
+        <a href="#"><i class="pi pi-instagram"></i></a>
+        <a href="#"><i class="pi pi-linkedin"></i></a>
+      </div>
+    </div>
+    
+    <div class="contact-form">
+      <p-card>
+        <ng-template pTemplate="title">
+          <h2>Send us a Message</h2>
+        </ng-template>
+        <ng-template pTemplate="content">
+          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+            <div class="p-field">
+              <label for="name">Name</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-user"></i>
+                <input 
+                  id="name" 
+                  type="text" 
+                  pInputText 
+                  formControlName="name" 
+                  placeholder="Your name" 
+                  class="w-full"
+                  [ngClass]="{'ng-invalid ng-dirty': submitted && f['name'].errors}"
+                >
+              </span>
+              <small *ngIf="submitted && f['name'].errors" class="p-error">
+                <span *ngIf="f['name'].errors['required']">Name is required</span>
+                <span *ngIf="f['name'].errors['minlength']">Name must be at least 2 characters</span>
+              </small>
+            </div>
+            
+            <div class="p-field">
+              <label for="email">Email *</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-envelope"></i>
+                <input 
+                  id="email" 
+                  type="text" 
+                  pInputText 
+                  formControlName="email" 
+                  placeholder="Your email address" 
+                  class="w-full"
+                  [ngClass]="{'ng-invalid ng-dirty': submitted && f['email'].errors}"
+                >
+              </span>
+              <small *ngIf="submitted && f['email'].errors" class="p-error">
+                <span *ngIf="f['email'].errors['required']">Email is required</span>
+                <span *ngIf="f['email'].errors['email']">Email must be a valid address</span>
+              </small>
+            </div>
+            
+            <div class="p-field">
+              <label for="subject">Subject</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-tag"></i>
+                <input 
+                  id="subject" 
+                  type="text" 
+                  pInputText 
+                  formControlName="subject" 
+                  placeholder="Message subject" 
+                  class="w-full"
+                >
+              </span>
+            </div>
+            
+            <div class="p-field">
+              <div class="flex justify-content-between">
+                <label for="message">Message *</label>
+                <small [ngClass]="{'text-danger': remainingChars < 20}">
+                  {{ remainingChars }} characters remaining
+                </small>
+              </div>
+              <textarea 
+                id="message" 
+                rows="5" 
+                pInputTextarea 
+                formControlName="message" 
+                placeholder="Your message" 
+                class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': submitted && f['message'].errors}"
+                maxlength="300"
+              ></textarea>
+              <small *ngIf="submitted && f['message'].errors" class="p-error">
+                <span *ngIf="f['message'].errors['required']">Message is required</span>
+                <span *ngIf="f['message'].errors['maxlength']">Message must be less than 300 characters</span>
+              </small>
+            </div>
+            
+            <div class="button-container">
+              <button 
+                type="submit" 
+                pButton 
+                label="Send Message" 
+                icon="pi pi-send" 
+                [loading]="loading" 
+                [disabled]="loading"
+              ></button>
+            </div>
+          </form>
+        </ng-template>
+      </p-card>
+    </div>
+  </div>
+</div>

@@ -1,68 +1,97 @@
 import { Request, Response } from 'express';
-import { CartService } from '../services/cartService';
+import { cartService } from '../services/cartService';
+import { ProductModel } from '../models/productModel';
 
 class CartController {
-  private cartService: CartService;
-
-  constructor() {
-    this.cartService = new CartService();
-  }
-
   // GET /cart - Get all items in the cart
-  public getCart = (req: Request, res: Response): void => {
+  public getCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const cart = this.cartService.getCart();
+      const userId = req.user.userId; // Get from auth middleware
+      const cart = cartService.getCart(userId);
       res.json(cart);
     } catch (error) {
-      console.error('Error retrieving cart:', error); // Add logging
+      console.error('Error retrieving cart:', error);
       res.status(500).json({ error: 'Failed to retrieve cart' });
     }
   };
 
   // POST /cart - Add an item to the cart
-  public addToCart = (req: Request, res: Response): void => {
+  public addToCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { product, quantity } = req.body;
-      this.cartService.addToCart(product, quantity);
-      res.status(201).json({ message: 'Item added to cart' });
+      const userId = req.user.userId;
+      const { productId, quantity } = req.body;
+      
+      // Validate input
+      if (!productId || !quantity || quantity < 1) {
+        res.status(400).json({ error: 'Invalid product ID or quantity' });
+        return;
+      }
+      
+      // Get product from database
+      const product = await ProductModel.getProductById(productId);
+      if (!product) {
+        res.status(404).json({ error: 'Product not found' });
+        return;
+      }
+      
+      const cartItem = cartService.addToCart(userId, product, quantity);
+      res.status(201).json(cartItem);
     } catch (error) {
-      console.error('Error adding item to cart:', error); // Add logging
+      console.error('Error adding item to cart:', error);
       res.status(500).json({ error: 'Failed to add item to cart' });
     }
   };
 
-  // PATCH /cart/:id - Update the quantity of an item in the cart
-  public updateCart = (req: Request, res: Response): void => {
+  // PUT/PATCH /cart/:id - Update the quantity of an item in the cart
+  public updateCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const userId = req.user.userId;
+      const productId = parseInt(req.params.id, 10);
       const { quantity } = req.body;
-      this.cartService.updateCart(parseInt(id, 10), quantity);
-      res.json({ message: 'Cart updated' });
+      
+      if (!quantity || quantity < 1) {
+        res.status(400).json({ error: 'Invalid quantity' });
+        return;
+      }
+      
+      const updatedItem = cartService.updateCart(userId, productId, quantity);
+      if (updatedItem) {
+        res.json(updatedItem);
+      } else {
+        res.status(404).json({ error: 'Item not found in cart' });
+      }
     } catch (error) {
-      console.error('Error updating cart:', error); // Add logging
+      console.error('Error updating cart:', error);
       res.status(500).json({ error: 'Failed to update cart' });
     }
   };
 
   // DELETE /cart/:id - Remove an item from the cart
-  public removeFromCart = (req: Request, res: Response): void => {
+  public removeFromCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      this.cartService.removeFromCart(parseInt(id, 10));
-      res.json({ message: 'Item removed from cart' });
+      const userId = req.user.userId;
+      const productId = parseInt(req.params.id, 10);
+      
+      const removed = cartService.removeFromCart(userId, productId);
+      if (removed) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ error: 'Item not found in cart' });
+      }
     } catch (error) {
-      console.error('Error removing item from cart:', error); // Add logging
+      console.error('Error removing item from cart:', error);
       res.status(500).json({ error: 'Failed to remove item from cart' });
     }
   };
 
   // DELETE /cart - Clear the entire cart
-  public clearCart = (req: Request, res: Response): void => {
+  public clearCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      this.cartService.clearCart();
-      res.json({ message: 'Cart cleared' });
+      const userId = req.user.userId;
+      cartService.clearCart(userId);
+      res.status(204).send();
     } catch (error) {
-      console.error('Error clearing cart:', error); // Add logging
+      console.error('Error clearing cart:', error);
       res.status(500).json({ error: 'Failed to clear cart' });
     }
   };
