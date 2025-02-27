@@ -17,7 +17,7 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
+  image: string;
   category: string;
   stock: number;
 }
@@ -37,7 +37,7 @@ interface Product {
     <div class="product-details-container">
       <div *ngIf="product$ | async as product; else loading" class="product-details">
         <div class="product-image">
-          <img [src]="product.imageUrl" [alt]="product.name">
+          <img [src]="product.image" [alt]="product.name">
         </div>
         <div class="product-info">
           <h1>{{ product.name }}</h1>

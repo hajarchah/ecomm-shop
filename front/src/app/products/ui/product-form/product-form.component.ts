@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Product } from '../../data-access/product.model';
@@ -10,7 +10,15 @@ import { DropdownModule } from 'primeng/dropdown';
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonModule, InputTextModule, InputTextareaModule, DropdownModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    ReactiveFormsModule, 
+    ButtonModule, 
+    InputTextModule, 
+    InputTextareaModule, 
+    DropdownModule
+  ],
   template: `
     <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
       <div class="p-fluid">
@@ -31,16 +39,12 @@ import { DropdownModule } from 'primeng/dropdown';
           <input id="category" type="text" pInputText formControlName="category" />
         </div>
         <div class="p-field">
-          <label for="quantity">Quantity</label>
-          <input id="quantity" type="number" pInputText formControlName="stock" />
-        </div>
-        <div class="p-field">
-          <label for="inventoryStatus">Inventory Status</label>
-          <input id="inventoryStatus" type="text" pInputText [(ngModel)]="product.inventoryStatus" name="inventoryStatus" required />
+          <label for="stock">Stock</label>
+          <input id="stock" type="number" pInputText formControlName="stock" />
         </div>
         <div class="p-field">
           <label for="image">Image URL</label>
-          <input id="image" type="text" pInputText formControlName="imageUrl" />
+          <input id="image" type="text" pInputText formControlName="image" />
         </div>
       </div>
       <div class="p-d-flex p-jc-between">
@@ -55,23 +59,8 @@ import { DropdownModule } from 'primeng/dropdown';
     }
   `]
 })
-export class ProductFormComponent {
-  @Input() product: Product = {
-    id: 0,
-    code: '',
-    name: '',
-    description: '',
-    image: '',
-    category: '',
-    price: 0,
-    quantity: 0,
-    inventoryStatus: 'INSTOCK',
-    rating: 0,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    internalReference: '',
-    shellId: 0
-  };
+export class ProductFormComponent implements OnInit {
+  @Input() product!: Product;
   @Output() save = new EventEmitter<Product>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -84,11 +73,31 @@ export class ProductFormComponent {
       price: ['', [Validators.required, Validators.min(0)]],
       category: [''],
       stock: [0, [Validators.min(0)]],
-      imageUrl: [''] // Optional
+      image: ['']
     });
   }
 
+  ngOnInit() {
+    if (this.product) {
+      this.productForm.patchValue({
+        name: this.product.name,
+        description: this.product.description,
+        price: this.product.price,
+        category: this.product.category,
+        stock: this.product.quantity,
+        image: this.product.image
+      });
+    }
+  }
+
   onSubmit() {
-    this.save.emit(this.productForm.value);
+    if (this.productForm.valid) {
+      const formValue = this.productForm.value;
+      this.save.emit({
+        ...this.product,
+        ...formValue,
+        quantity: formValue.stock
+      });
+    }
   }
 }

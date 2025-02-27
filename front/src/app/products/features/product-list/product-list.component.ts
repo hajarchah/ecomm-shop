@@ -216,7 +216,7 @@ export class ProductListComponent implements OnInit {
 
   public onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
-    target.src = 'https://via.placeholder.com/300x150?text=No+Image';
+    target.src = './assets/images/no_image.jpg';
   }
 
   public openNew(): void {

@@ -9,7 +9,7 @@ import { Product } from './product.model';
 })
 export class ProductService {
   private apiUrl = `${environment.apiUrl}/products`;
-  private defaultImage = '/assets/images/default-product.jpg';
+  private defaultImage = '/assets/images/no_image.jpg';
 
   constructor(private http: HttpClient) {}
 
@@ -18,7 +18,7 @@ export class ProductService {
       .pipe(
         map(products => products.map(product => ({
           ...product,
-          imageUrl: product.image || this.defaultImage
+          image: product.image || this.defaultImage
         })))
       );
   }
@@ -28,7 +28,7 @@ export class ProductService {
       .pipe(
         map(product => ({
           ...product,
-          imageUrl: product.image || this.defaultImage
+          image: product.image || this.defaultImage
         }))
       );
   }

@@ -14,6 +14,8 @@ import seedDatabase from './seed';
 import { seedAdminUser } from './seed';
 import { authenticateJWT, isAdmin } from './middleware/auth.middleware';
 import { isAdminEmail } from './middleware/admin-email.middleware';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './swagger';
 
 // Load environment variables
 dotenv.config();
@@ -23,7 +25,10 @@ const PORT = process.env.PORT || 3000;
 const app: Application = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+}));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,6 +52,9 @@ app.use('/api', authRoutes); // Makes auth routes available at /api/register, /a
 app.use('/api', authRoutes);
 app.get('/api/products', productRoutes); // Anyone can view products
 app.use('/api', wishlistRoutes); // Make sure this is BEFORE any protected routes
+
+// Add Swagger documentation route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Protected routes (require authentication) - these should come AFTER public routes
 app.use('/api/products', productRoutes); // Products are public

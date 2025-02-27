@@ -1,78 +1,63 @@
-import { Request, Response } from 'express';
-import WishlistModel from '../models/wishlistModel';
+import { Request, Response } from "express";
+import WishlistModel from "../models/wishlistModel";
 
 class WishlistController {
-  // Get user's wishlist
-  public getUserWishlist = async (req: Request, res: Response): Promise<void> => {
+  public getWishlist = async (req: Request, res: Response) => {
     try {
-      const userId = req.user.userId;
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const userId = Number(req.user.userId);
       const wishlist = await WishlistModel.getUserWishlist(userId);
-      
-      // Transform to include only product data
-      const transformedWishlist = wishlist.map(item => ({
-        id: item.id,
-        product: item.product,
-        addedAt: item.createdAt
-      }));
-      
-      res.json(transformedWishlist);
+      res.json(wishlist);
     } catch (error) {
-      console.error('Error retrieving wishlist:', error);
-      res.status(500).json({ message: 'Failed to retrieve wishlist' });
+      res.status(500).json({ message: "Error fetching wishlist" });
     }
   };
 
-  // Add product to wishlist
-  public addToWishlist = async (req: Request, res: Response): Promise<void> => {
+  public addToWishlist = async (req: Request, res: Response) => {
     try {
-      const userId = req.user.userId;
-      const { productId } = req.body;
-      
-      if (!productId) {
-        res.status(400).json({ message: 'Product ID is required' });
-        return;
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: "User not authenticated" });
       }
-      
+      const userId = Number(req.user.userId);
+      const productId = Number(req.params.productId);
+
       const wishlistItem = await WishlistModel.addToWishlist(userId, productId);
-      res.status(201).json(wishlistItem);
+      res.json(wishlistItem);
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      res.status(500).json({ message: 'Failed to add item to wishlist' });
+      res.status(500).json({ message: "Error adding to wishlist" });
     }
   };
 
-  // Remove product from wishlist
-  public removeFromWishlist = async (req: Request, res: Response): Promise<void> => {
+  public removeFromWishlist = async (req: Request, res: Response) => {
     try {
-      const userId = req.user.userId;
-      const productId = parseInt(req.params.productId, 10);
-      
-      const success = await WishlistModel.removeFromWishlist(userId, productId);
-      
-      if (success) {
-        res.status(204).send();
-      } else {
-        res.status(404).json({ message: 'Product not found in wishlist' });
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: "User not authenticated" });
       }
+      const userId = Number(req.user.userId);
+      const productId = Number(req.params.productId);
+
+      const success = await WishlistModel.removeFromWishlist(userId, productId);
+      res.json({ success });
     } catch (error) {
-      console.error('Error removing from wishlist:', error);
-      res.status(500).json({ message: 'Failed to remove item from wishlist' });
+      res.status(500).json({ message: "Error removing from wishlist" });
     }
   };
 
-  // Check if product is in wishlist
-  public isInWishlist = async (req: Request, res: Response): Promise<void> => {
+  public checkWishlist = async (req: Request, res: Response) => {
     try {
-      const userId = req.user.userId;
-      const productId = parseInt(req.params.productId, 10);
-      
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      const userId = Number(req.user.userId);
+      const productId = Number(req.params.productId);
+
       const isInWishlist = await WishlistModel.isInWishlist(userId, productId);
       res.json({ isInWishlist });
     } catch (error) {
-      console.error('Error checking wishlist:', error);
-      res.status(500).json({ message: 'Failed to check wishlist status' });
+      res.status(500).json({ message: "Error checking wishlist" });
     }
   };
 }
-
 export default new WishlistController();

@@ -12,7 +12,7 @@ class CartController {
         return;
       }
 
-      const cart = cartService.getCart(userId);
+      const cart = cartService.getCart(String(userId));
       res.json(cart);
     } catch (error) {
       console.error('Error retrieving cart:', error);
@@ -44,7 +44,7 @@ class CartController {
         return;
       }
       
-      const cartItem = cartService.addToCart(userId, product, quantity);
+      const cartItem = cartService.addToCart(String(userId), product, quantity);
       res.status(201).json(cartItem);
     } catch (error) {
       console.error('Error adding item to cart:', error);
@@ -69,7 +69,7 @@ class CartController {
         return;
       }
       
-      const updatedItem = cartService.updateCart(userId, productId, quantity);
+      const updatedItem = cartService.updateCart(String(userId), productId, quantity);
       if (updatedItem) {
         res.json(updatedItem);
       } else {
@@ -92,7 +92,7 @@ class CartController {
 
       const productId = parseInt(req.params.id, 10);
       
-      const removed = cartService.removeFromCart(userId, productId);
+      const removed = cartService.removeFromCart(String(userId), productId);
       if (removed) {
         res.status(204).send();
       } else {
@@ -113,7 +113,7 @@ class CartController {
         return;
       }
       
-      cartService.clearCart(userId);
+      cartService.clearCart(String(userId));
       res.status(200).json({ message: 'Cart cleared successfully' });
     } catch (error) {
       console.error('Error clearing cart:', error);

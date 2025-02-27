@@ -43,9 +43,24 @@ class ProductController {
       }
       
       // Set default image URL if not provided
-      if (!productData.imageUrl) {
-        productData.imageUrl = '/assets/images/default-product.jpg';
+      if (!productData.image) {
+        productData.image = '/assets/images/no_image.jpg';
       }
+
+      // Generate a unique product code
+      const timestamp = Date.now();
+      const randomNum = Math.floor(Math.random() * 1000);
+      productData.code = `PROD-${timestamp}-${randomNum}`;
+      
+      // Map imageUrl to image field
+      productData.image = productData.image;
+      
+      // Set default values for required fields
+      productData.quantity = productData.stock || 0;
+      productData.inventoryStatus = productData.quantity > 0 ? 'INSTOCK' : 'OUTOFSTOCK';
+      productData.rating = 0;
+      productData.createdAt = new Date();
+      productData.updatedAt = new Date();
       
       // Create product
       const newProduct = await ProductRepository.save(productData);
