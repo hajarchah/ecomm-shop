@@ -15,36 +15,38 @@
 
 <div class="product-list-container">
   <!-- Toolbar with search and filters -->
-  <div class="search-filter-container p-3">
-    <div class="p-inputgroup search-box">
-      <span class="p-inputgroup-addon">
-        <i class="pi pi-search"></i>
-      </span>
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="searchQuery"
-        (ngModelChange)="filterProducts()"
-        placeholder="Search products..."
-        class="p-inputtext"
-      />
-    </div>
-    <p-dropdown
-      [options]="categories"
-      [(ngModel)]="selectedCategory"
-      (onChange)="filterProducts()"
-      placeholder="Select Category"
-      styleClass="category-dropdown"
-      [showClear]="true"
-    ></p-dropdown>
-    <button
-      pButton
-      icon="pi pi-plus"
-      label="Add Product"
-      class="p-button-rounded p-button-primary add-button"
-      (click)="openNew()"
-    ></button>
-  </div>
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <div class="search-filter-container p-3">
+        <div class="p-inputgroup search-box">
+          <span class="p-inputgroup-addon">
+            <i class="pi pi-search"></i>
+          </span>
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="filterProducts()"
+            placeholder="Search products..."
+            class="p-inputtext"
+          />
+        </div>
+        <p-dropdown
+          [options]="categories"
+          [(ngModel)]="selectedCategory"
+          (onChange)="filterProducts()"
+          placeholder="Select Category"
+          styleClass="category-dropdown"
+          [showClear]="true"
+        ></p-dropdown>
+      </div>
+    </ng-template>
+    
+    <ng-template pTemplate="right">
+      <!-- Only show "New Product" button for admin -->
+      <button *ngIf="isAdmin" pButton pRipple label="New Product" icon="pi pi-plus" class="p-button-success" (click)="openNew()"></button>
+    </ng-template>
+  </p-toolbar>
 
   <!-- No products message -->
   <div *ngIf="filteredProducts.length === 0" class="no-products">
@@ -66,7 +68,7 @@
                 (error)="onImageError($event)"
                 class="product-image"
               />
-              <div class="product-overlay">
+              <div class="product-overlay" *ngIf="isAdmin">
                 <button
                   pButton
                   icon="pi pi-pencil"
@@ -101,13 +103,22 @@
           <ng-template pTemplate="footer">
             <div class="product-footer">
               <span class="product-price">{{ product.price | currency }}</span>
-              <button
-                pButton
-                icon="pi pi-shopping-cart"
-                label="Add to Cart"
-                class="p-button-rounded p-button"
-                (click)="addToCart(product)"
-              ></button>
+              <div class="product-actions">
+                <button
+                  pButton
+                  icon="pi pi-shopping-cart"
+                  label="Add to Cart"
+                  class="p-button-rounded p-button"
+                  (click)="addToCart(product)"
+                ></button>
+                <button
+                  pButton
+                  icon="pi pi-heart"
+                  class="p-button-rounded p-button-outlined p-button-secondary ml-2"
+                  (click)="addToWishlist(product)"
+                  pTooltip="Add to Wishlist"
+                ></button>
+              </div>
             </div>
           </ng-template>
         </p-card>

@@ -1,23 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Product } from './product.model';
+import { Observable, map, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Product } from './product.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private apiUrl = `${environment.apiUrl}/products`;
+  private defaultImage = '/assets/images/default-product.jpg';
 
   constructor(private http: HttpClient) {}
 
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl);
+  getAllProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(this.apiUrl)
+      .pipe(
+        map(products => products.map(product => ({
+          ...product,
+          imageUrl: product.image || this.defaultImage
+        })))
+      );
   }
 
-  getProduct(id: number): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${id}`);
+  getProductById(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/${id}`)
+      .pipe(
+        map(product => ({
+          ...product,
+          imageUrl: product.image || this.defaultImage
+        }))
+      );
   }
 
   createProduct(product: Partial<Product>): Observable<Product> {

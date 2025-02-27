@@ -61,10 +61,23 @@ export class CartService {
       );
   }
 
-  clearCart(): Observable<void> {
-    return this.http.delete<void>(this.apiUrl)
-      .pipe(
-        tap(() => this.loadCart())
-      );
+  clearCart(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/clear`).pipe(
+      tap(() => {
+        this.cartItemsSubject.next([]);
+      })
+    );
+  }
+
+  getCartCount(): number {
+    return this.cartItemsSubject.value.reduce(
+      (count, item) => count + item.quantity, 0
+    );
+  }
+
+  getCartTotal(): number {
+    return this.cartItemsSubject.value.reduce(
+      (total, item) => total + (item.product.price * item.quantity), 0
+    );
   }
 }

@@ -13,6 +13,7 @@ import { initializeDatabase } from './database';
 import seedDatabase from './seed';
 import { seedAdminUser } from './seed';
 import { authenticateJWT, isAdmin } from './middleware/auth.middleware';
+import { isAdminEmail } from './middleware/admin-email.middleware';
 
 // Load environment variables
 dotenv.config();
@@ -42,6 +43,11 @@ app.get('/', (req, res) => {
 // Public auth routes
 app.use('/api', authRoutes); // Makes auth routes available at /api/register, /api/login, etc.
 
+// Public routes
+app.use('/api', authRoutes);
+app.get('/api/products', productRoutes); // Anyone can view products
+app.use('/api', wishlistRoutes); // Make sure this is BEFORE any protected routes
+
 // Protected routes (require authentication) - these should come AFTER public routes
 app.use('/api/products', productRoutes); // Products are public
 app.use('/api/cart', authenticateJWT, cartRoutes);
@@ -51,10 +57,10 @@ app.use('/api/wishlist', authenticateJWT, wishlistRoutes);
 // Admin-only routes
 app.use('/api/admin', authenticateJWT, isAdmin, adminRoutes); // Only admins can access admin routes
 
-// Protected product modification routes (POST, PATCH, DELETE)
-app.post('/api/products', authenticateJWT, isAdmin, (req, res, next) => next());
-app.patch('/api/products/:id', authenticateJWT, isAdmin, (req, res, next) => next());
-app.delete('/api/products/:id', authenticateJWT, isAdmin, (req, res, next) => next());
+// Protected product modification routes (POST, PATCH, DELETE) - only admin@admin.com can access
+app.post('/api/products', authenticateJWT, isAdminEmail, productRoutes);
+app.patch('/api/products/:id', authenticateJWT, isAdminEmail, productRoutes);
+app.delete('/api/products/:id', authenticateJWT, isAdminEmail, productRoutes);
 
 // Start server
 async function startServer() {

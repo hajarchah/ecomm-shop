@@ -7,16 +7,10 @@ const router = Router();
 // All routes require authentication
 router.use(authenticateJWT);
 
-// Get user's wishlist
-router.get('/wishlist', wishlistController.getUserWishlist);
-
-// Add product to wishlist
-router.post('/wishlist', wishlistController.addToWishlist);
-
-// Remove product from wishlist
-router.delete('/wishlist/:productId', wishlistController.removeFromWishlist);
-
-// Check if product is in wishlist
-router.get('/wishlist/check/:productId', wishlistController.isInWishlist);
+// Update these routes - remove the '/wishlist' prefix since we're already mounting at '/api'
+router.get('/', wishlistController.getUserWishlist);              // GET /api/wishlist
+router.post('/', wishlistController.addToWishlist);              // POST /api/wishlist 
+router.delete('/:productId', wishlistController.removeFromWishlist); // DELETE /api/wishlist/:productId
+router.get('/check/:productId', wishlistController.isInWishlist);    // GET /api/wishlist/check/:productId
 
 export default router;

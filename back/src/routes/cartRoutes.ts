@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import cartController from '../controllers/cartController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authenticateJWT } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// All cart routes require authentication
-router.use(authMiddleware);
+router.use(authenticateJWT);
 
+// Important: Put specific routes BEFORE parametric routes
 router.get('/', cartController.getCart);
 router.post('/', cartController.addToCart);
+router.delete('/clear', cartController.clearCart); // Move this BEFORE /:id routes
 router.put('/:id', cartController.updateCart);
 router.delete('/:id', cartController.removeFromCart);
-router.delete('/', cartController.clearCart);
 
 export default router;

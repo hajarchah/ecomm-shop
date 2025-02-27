@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ProductRepository } from '../repositories/product.repository';
 import ProductModel from '../models/productModel';
 
 class ProductController {
@@ -33,12 +34,25 @@ class ProductController {
   // POST /products - Add a new product
   public createProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-      const product = req.body;
-      const newProduct = await ProductModel.addProduct(product);
+      const productData = req.body;
+      
+      // Validate required fields
+      if (!productData.name || !productData.price) {
+        res.status(400).json({ message: 'Name and price are required' });
+        return;
+      }
+      
+      // Set default image URL if not provided
+      if (!productData.imageUrl) {
+        productData.imageUrl = '/assets/images/default-product.jpg';
+      }
+      
+      // Create product
+      const newProduct = await ProductRepository.save(productData);
       res.status(201).json(newProduct);
     } catch (error) {
       console.error('Error creating product:', error);
-      res.status(500).json({ error: 'Failed to create product' });
+      res.status(500).json({ message: 'Failed to create product' });
     }
   };
 

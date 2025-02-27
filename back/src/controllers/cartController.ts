@@ -6,7 +6,12 @@ class CartController {
   // GET /cart - Get all items in the cart
   public getCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.user.userId; // Get from auth middleware
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
       const cart = cartService.getCart(userId);
       res.json(cart);
     } catch (error) {
@@ -18,7 +23,12 @@ class CartController {
   // POST /cart - Add an item to the cart
   public addToCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
       const { productId, quantity } = req.body;
       
       // Validate input
@@ -45,7 +55,12 @@ class CartController {
   // PUT/PATCH /cart/:id - Update the quantity of an item in the cart
   public updateCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
       const productId = parseInt(req.params.id, 10);
       const { quantity } = req.body;
       
@@ -69,7 +84,12 @@ class CartController {
   // DELETE /cart/:id - Remove an item from the cart
   public removeFromCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+
       const productId = parseInt(req.params.id, 10);
       
       const removed = cartService.removeFromCart(userId, productId);
@@ -87,9 +107,14 @@ class CartController {
   // DELETE /cart - Clear the entire cart
   public clearCart = async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = req.user.userId;
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Authentication required' });
+        return;
+      }
+      
       cartService.clearCart(userId);
-      res.status(204).send();
+      res.status(200).json({ message: 'Cart cleared successfully' });
     } catch (error) {
       console.error('Error clearing cart:', error);
       res.status(500).json({ error: 'Failed to clear cart' });

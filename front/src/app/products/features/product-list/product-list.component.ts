@@ -5,6 +5,9 @@ import { Product } from "../../data-access/product.model";
 import { ProductService } from "../../data-access/products.service";
 import { CartService } from "../../../cart/data-access/cart.service";
 import { MessageService, ConfirmationService } from "primeng/api";
+import { AuthService } from "../../../auth/data-access/auth.service"; // Add this import
+import { WishlistService } from '../../../wishlist/data-access/wishlist.service';
+import { Router } from '@angular/router';
 
 // PrimeNG imports
 import { ButtonModule } from "primeng/button";
@@ -16,6 +19,7 @@ import { ToolbarModule } from "primeng/toolbar";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { TableModule } from "primeng/table";
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { ProductFormComponent } from "../../ui/product-form/product-form.component";
 
 @Component({
@@ -35,6 +39,7 @@ import { ProductFormComponent } from "../../ui/product-form/product-form.compone
     ConfirmDialogModule,
     TableModule,
     DialogModule,
+    TooltipModule,
     ProductFormComponent
   ],
   providers: [CurrencyPipe, MessageService, ConfirmationService],
@@ -44,6 +49,12 @@ export class ProductListComponent implements OnInit {
   private readonly cartService = inject(CartService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly authService = inject(AuthService); // Add this line
+  private readonly wishlistService = inject(WishlistService);
+  private readonly router = inject(Router);
+  
+  // Add this property to track admin status
+  public isAdmin = false;
   
   public products: Product[] = [];
   public filteredProducts: Product[] = [];
@@ -72,10 +83,18 @@ export class ProductListComponent implements OnInit {
   
   ngOnInit(): void {
     this.loadProducts();
+    this.checkAdminStatus(); // Add this line
+  }
+  
+  // Add this method to check admin status
+  private checkAdminStatus(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.isAdmin = user?.email === 'admin@admin.com';
+    });
   }
   
   loadProducts(): void {
-    this.productsService.getProducts().subscribe({
+    this.productsService.getAllProducts().subscribe({
       next: (products) => {
         this.products = products;
         this.initializeFiltering();
@@ -142,6 +161,55 @@ export class ProductListComponent implements OnInit {
           summary: 'Error',
           detail: 'Failed to add product to cart'
         });
+      }
+    });
+  }
+
+  public addToWishlist(product: Product): void {
+    // Check if user is logged in
+    if (!this.authService.isAuthenticated()) {
+      // If not logged in, redirect to login page
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Login Required',
+        detail: 'Please log in to add items to your wishlist'
+      });
+      this.router.navigate(['/login'], { 
+        queryParams: { returnUrl: this.router.url } 
+      });
+      return;
+    }
+
+    // Add to wishlist
+    let userId: number | undefined;
+    this.authService.currentUser$.subscribe(user => {
+      userId = user?.id;
+    });
+    this.wishlistService.addToWishlist(product.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `${product.name} added to your wishlist`
+        });
+      },
+      error: (err) => {
+        console.error('Error adding to wishlist', err);
+      
+        // If the item is already in the wishlist, show a different message
+        if (err.status === 409) {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Information',
+            detail: 'This item is already in your wishlist'
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to add item to wishlist'
+          });
+        }
       }
     });
   }

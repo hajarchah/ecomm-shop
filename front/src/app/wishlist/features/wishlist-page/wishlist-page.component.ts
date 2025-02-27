@@ -49,7 +49,7 @@ import { Product } from 'app/products/data-access/product.model';
             <ng-template pTemplate="body" let-item>
               <tr>
                 <td>
-                  <img [src]="item.product.imageUrl" 
+                  <img [src]="item.product.image" 
                        [alt]="item.product.name" 
                        class="product-image"
                        (click)="viewProductDetails(item.product.id)">

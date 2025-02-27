@@ -201,12 +201,26 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
-    .product-price {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-color);
-    }
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .product-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2196F3;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .ml-2 {
+    margin-left: 0.5rem;
   }
 }
 
@@ -250,5 +264,13 @@
   
   .product-image-container {
     height: 200px;
+  }
+}
+
+// Ensure heart icon button is prominent enough
+:host ::ng-deep .p-button.p-button-secondary.p-button-outlined {
+  &:hover {
+    background: rgba(156, 39, 176, 0.1);
+    color: #9c27b0;
   }
 }

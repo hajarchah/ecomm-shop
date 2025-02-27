@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Product } from '../../data-access/product.model';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -10,29 +10,29 @@ import { DropdownModule } from 'primeng/dropdown';
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, InputTextareaModule, DropdownModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonModule, InputTextModule, InputTextareaModule, DropdownModule],
   template: `
-    <form (ngSubmit)="onSubmit()">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
       <div class="p-fluid">
         <div class="p-field">
           <label for="name">Name</label>
-          <input id="name" type="text" pInputText [(ngModel)]="product.name" name="name" required />
+          <input id="name" type="text" pInputText formControlName="name" required />
         </div>
         <div class="p-field">
           <label for="description">Description</label>
-          <textarea id="description" pInputTextarea [(ngModel)]="product.description" name="description" required></textarea>
+          <textarea id="description" pInputTextarea formControlName="description" required></textarea>
         </div>
         <div class="p-field">
           <label for="price">Price</label>
-          <input id="price" type="number" pInputText [(ngModel)]="product.price" name="price" required />
+          <input id="price" type="number" pInputText formControlName="price" required />
         </div>
         <div class="p-field">
           <label for="category">Category</label>
-          <input id="category" type="text" pInputText [(ngModel)]="product.category" name="category" required />
+          <input id="category" type="text" pInputText formControlName="category" />
         </div>
         <div class="p-field">
           <label for="quantity">Quantity</label>
-          <input id="quantity" type="number" pInputText [(ngModel)]="product.quantity" name="quantity" required />
+          <input id="quantity" type="number" pInputText formControlName="stock" />
         </div>
         <div class="p-field">
           <label for="inventoryStatus">Inventory Status</label>
@@ -40,7 +40,7 @@ import { DropdownModule } from 'primeng/dropdown';
         </div>
         <div class="p-field">
           <label for="image">Image URL</label>
-          <input id="image" type="text" pInputText [(ngModel)]="product.image" name="image" />
+          <input id="image" type="text" pInputText formControlName="imageUrl" />
         </div>
       </div>
       <div class="p-d-flex p-jc-between">
@@ -75,7 +75,20 @@ export class ProductFormComponent {
   @Output() save = new EventEmitter<Product>();
   @Output() cancel = new EventEmitter<void>();
 
+  productForm: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.productForm = this.fb.group({
+      name: ['', [Validators.required]],
+      description: ['', [Validators.required]],
+      price: ['', [Validators.required, Validators.min(0)]],
+      category: [''],
+      stock: [0, [Validators.min(0)]],
+      imageUrl: [''] // Optional
+    });
+  }
+
   onSubmit() {
-    this.save.emit(this.product);
+    this.save.emit(this.productForm.value);
   }
 }

@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+interface JWTPayload {
+  userId: string;
+  email: string;
+  role?: string;
+}
+
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   try {
     // Get token from Authorization header
@@ -12,11 +18,15 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     
     const token = authHeader.split(' ')[1];
     
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-default-secret');
+    // Verify token with proper typing
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-default-secret') as JWTPayload;
     
     // Add user info to request
-    req.user = decoded;
+    req.user = {
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role
+    };
     
     next();
   } catch (error) {
@@ -24,12 +34,3 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
-
-// Add type definition for Request
-declare global {
-  namespace Express {
-    interface Request {
-      user: any;
-    }
-  }
-}
